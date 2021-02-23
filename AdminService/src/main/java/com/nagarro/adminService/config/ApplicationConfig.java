@@ -1,5 +1,6 @@
 package com.nagarro.adminService.config;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -10,4 +11,8 @@ public class ApplicationConfig {
 	 	public Gson gson() {
 		 return new Gson();
 	 }
+	 @Bean
+	   public ModelMapper modelMapper() {
+		 return new ModelMapper();
+	       }	 
 }
