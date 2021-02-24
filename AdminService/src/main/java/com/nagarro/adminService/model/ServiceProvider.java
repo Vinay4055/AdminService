@@ -24,4 +24,13 @@ public class ServiceProvider implements Serializable{
 	String categoryId;
 	List<String> notificationId;
 	List<String> serviceRequestId;
+	@Override
+	public String toString() {
+		return "ServiceProvider [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + ", title=" + title
+				+ ", email=" + email + ", telePhone=" + telePhone + ", address=" + address + ", district=" + district
+				+ ", city=" + city + ", state=" + state + ", zip=" + zip + ", country=" + country + ", password="
+				+ password + ", categoryId=" + categoryId + ", notificationId=" + notificationId + ", serviceRequestId="
+				+ serviceRequestId + "]";
+	}
+	
 }

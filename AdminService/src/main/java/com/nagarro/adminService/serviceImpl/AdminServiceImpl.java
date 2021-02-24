@@ -14,6 +14,7 @@ import com.nagarro.adminService.common.ServiceRequestStatus;
 import com.nagarro.adminService.delegate.AdminServiceDelegate;
 import com.nagarro.adminService.entity.ServiceRequest;
 import com.nagarro.adminService.mapper.Mapper;
+import com.nagarro.adminService.model.AcceptServiceRequestResponse;
 import com.nagarro.adminService.model.NotificationRequest;
 import com.nagarro.adminService.model.ServiceProvider;
 import com.nagarro.adminService.service.AdminService;
@@ -32,9 +33,9 @@ public class AdminServiceImpl implements AdminService {
 	List<ServiceRequest> serviceRequestList = new ArrayList<>();
 
 	@Override
-	public ServiceRequest findService(String serviceId) {
+	public ServiceRequest findServiceRequest(String serviceRequestId) {
 		Optional<ServiceRequest> resultServiceRequest = serviceRequestList.stream()
-				.filter(serviceRequest -> serviceRequest.getId().equals(serviceId)).findFirst();
+				.filter(serviceRequest -> serviceRequest.getId().equals(serviceRequestId)).findFirst();
 		if (resultServiceRequest.isPresent())
 			return resultServiceRequest.get();
 		else
@@ -46,26 +47,38 @@ public class AdminServiceImpl implements AdminService {
 	public void receiveServiceRequest(String serviceRequest) {
 		ServiceRequest serviceRequestObject = gson.fromJson(serviceRequest, ServiceRequest.class);
 		serviceRequestObject.setStatusOfRequest(ServiceRequestStatus.PENDING);
+		jmsTemplate.convertAndSend("ServiceRequestReceivedToAdmin", gson.toJson(serviceRequestObject.getId()));
 		serviceRequestList.add(serviceRequestObject);
 		String location = adminServiceDelegate
 				.callServiceReceiverAndGetLocation(serviceRequestObject.getEmailIdOfServiceReceiver());
 		List<ServiceProvider> serviceProviderList = getServiceProviderListBasedOnLocation(location);
-		jmsTemplate.convertAndSend("ServiceRequestReceivedFromAdmin", gson.toJson(new NotificationRequest(serviceProviderList,
-				mapper.convertServiceRequestEntityToModel(serviceRequestObject))));
-		
+		jmsTemplate.convertAndSend("ServiceRequestReceivedFromAdmin",
+				gson.toJson(new NotificationRequest(serviceProviderList,
+						mapper.convertServiceRequestEntityToModel(serviceRequestObject))));
+
 	}
 
 	@Override
-	@JmsListener(destination = "cancelPendingServiceRequest")
-	public void cancelPendingServiceRequest(String serviceRequestId) {
-		ServiceRequest serviceRequest = findService(serviceRequestId);
+	@JmsListener(destination = "cancelServiceRequestFromAdmin")
+	public void cancelServiceRequest(String serviceRequestId) {
+		String serviceRequestIdObject = gson.fromJson(serviceRequestId,String.class);
+		ServiceRequest serviceRequest = findServiceRequest(serviceRequestIdObject);
 		serviceRequest.setStatusOfRequest(ServiceRequestStatus.CANCEL);
 	}
-
+	
 	@Override
 	public List<ServiceProvider> getServiceProviderListBasedOnLocation(String location) {
 		return adminServiceDelegate.callServiceProviderAndGetListOfServiceProviders(location);
 
+	}
+
+	@JmsListener(destination = "RequestAcceptedByServiceProvider")
+	public void requestAcceptedByServiceProvider(String acceptServiceRequestResponse) {
+		AcceptServiceRequestResponse acceptServiceRequestResponseObject = gson.fromJson(acceptServiceRequestResponse,
+				AcceptServiceRequestResponse.class);
+		System.out.println(acceptServiceRequestResponseObject);
+		ServiceRequest serviceRequest = findServiceRequest(acceptServiceRequestResponseObject.getServiceRequestId());
+		serviceRequest.setStatusOfRequest(ServiceRequestStatus.CONFIRMED);
 	}
 
 }

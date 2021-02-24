@@ -9,8 +9,8 @@ import com.nagarro.adminService.model.ServiceProvider;
 
 @Service
 public interface AdminService {
-	public ServiceRequest findService(String serviceId);
+	public ServiceRequest findServiceRequest(String serviceRequestId);
 	public void receiveServiceRequest(String serviceRequest);
-	public void cancelPendingServiceRequest(String serviceRequestId);
+	public void cancelServiceRequest(String serviceRequestId);
 	public List<ServiceProvider> getServiceProviderListBasedOnLocation(String location);
 }
