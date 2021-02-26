@@ -60,7 +60,7 @@ public class AdminServiceImpl implements AdminService {
 
 	@Override
 	@JmsListener(destination = "cancelServiceRequestFromAdmin")
-	public void cancelServiceRequest(String serviceRequestId) {
+	public void acceptCancelServiceRequestEventFromServiceReceiver(String serviceRequestId) {
 		String serviceRequestIdObject = gson.fromJson(serviceRequestId,String.class);
 		ServiceRequest serviceRequest = findServiceRequest(serviceRequestIdObject);
 		serviceRequest.setStatusOfRequest(ServiceRequestStatus.CANCEL);
@@ -76,9 +76,18 @@ public class AdminServiceImpl implements AdminService {
 	public void requestAcceptedByServiceProvider(String acceptServiceRequestResponse) {
 		AcceptServiceRequestResponse acceptServiceRequestResponseObject = gson.fromJson(acceptServiceRequestResponse,
 				AcceptServiceRequestResponse.class);
-		System.out.println(acceptServiceRequestResponseObject);
 		ServiceRequest serviceRequest = findServiceRequest(acceptServiceRequestResponseObject.getServiceRequestId());
 		serviceRequest.setStatusOfRequest(ServiceRequestStatus.CONFIRMED);
+	}
+
+	@Override
+	@JmsListener(destination = "ServiceRequestCancelledByServiceProviderEventForAdmin")
+	public void acceptCancelServiceRequestEventFromServiceProvider(String serviceRequestId) {
+		String serviceRequestIdObject = gson.fromJson(serviceRequestId,String.class);
+		ServiceRequest serviceRequest = findServiceRequest(serviceRequestIdObject);
+		serviceRequest.setStatusOfRequest(ServiceRequestStatus.CANCELLEDBYSERVICEPROVIDER);
+		
+		this.receiveServiceRequest(gson.toJson(serviceRequest));
 	}
 
 }

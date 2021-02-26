@@ -11,6 +11,7 @@ import com.nagarro.adminService.model.ServiceProvider;
 public interface AdminService {
 	public ServiceRequest findServiceRequest(String serviceRequestId);
 	public void receiveServiceRequest(String serviceRequest);
-	public void cancelServiceRequest(String serviceRequestId);
+	public void acceptCancelServiceRequestEventFromServiceReceiver(String serviceRequestId);
+	public void acceptCancelServiceRequestEventFromServiceProvider(String serviceRequestId);
 	public List<ServiceProvider> getServiceProviderListBasedOnLocation(String location);
 }

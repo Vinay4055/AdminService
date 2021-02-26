@@ -21,9 +21,12 @@ public class AdminServiceDelegate {
 	@Autowired
 	@Qualifier("gson")
 	Gson gson;
+	String gatewayServiceUrl = "http://api-gateway:9999/";
+	String gatewayUrl = "http://localhost:9999/";
+	String url = gatewayUrl;
 	public String callServiceReceiverAndGetLocation(String email) {
 		String response = restTemplate
-				.exchange("http://localhost:9999/serviceReceiver/accountDetail/location/{email}"
+				.exchange(url+"serviceReceiver/accountDetail/location/{email}"
 				, HttpMethod.GET
 				, null
 				, new ParameterizedTypeReference<String>() {
@@ -35,7 +38,7 @@ public class AdminServiceDelegate {
 	
 	public List<ServiceProvider> callServiceProviderAndGetListOfServiceProviders(String location) {
 		String response = restTemplate
-				.exchange("http://localhost:9999/serviceProvider/{location}"
+				.exchange(url+"serviceProvider/{location}"
 				, HttpMethod.GET
 				, null
 				, new ParameterizedTypeReference<String>() {
