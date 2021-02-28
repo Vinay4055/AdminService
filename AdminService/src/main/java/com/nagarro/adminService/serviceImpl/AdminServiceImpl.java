@@ -86,8 +86,13 @@ public class AdminServiceImpl implements AdminService {
 		String serviceRequestIdObject = gson.fromJson(serviceRequestId,String.class);
 		ServiceRequest serviceRequest = findServiceRequest(serviceRequestIdObject);
 		serviceRequest.setStatusOfRequest(ServiceRequestStatus.CANCELLEDBYSERVICEPROVIDER);
+		try {
+			Thread.sleep(10000);
+			this.receiveServiceRequest(gson.toJson(serviceRequest));
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		
-		this.receiveServiceRequest(gson.toJson(serviceRequest));
 	}
 
 }
